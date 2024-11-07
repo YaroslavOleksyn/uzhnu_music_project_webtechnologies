@@ -44,7 +44,7 @@ const MusicPlayer = ({ genre, trackIds }) => {
         const filteredTracks = combinedTracks.filter(track => track !== null);
         setTracks(filteredTracks);
       } catch (error) {
-        console.error("Error fetching tracks:", error);
+        console.error("Error fetching track:", error);
         setError("There was an error fetching the tracks.");
       } finally {
         setLoading(false);
