@@ -2,36 +2,40 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useForm } from 'react-hook-form';
+import { fetchAuth } from '../redux/auth.js';
 
 import styles from './index.module.scss';
 
 function UntitledPage123(props) {
-  const navigate = useNavigate(); 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { register, handleSubmit, setError, formState: { errors, isValid } } = useForm({
+    defaultValues: {
+      nickNam: '',
+      email: '',
+      password: '',
+    },
+  });
 
-  const [nickname, setNickname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({}); 
-  
+  const onSubmit = async (values) => {
+    const reguser = await dispatch(fetchAuth(values));
+    console.log('Registration response:', reguser); 
+    if (reguser.payload && reguser.payload.token) {
+      window.localStorage.setItem('token', reguser.payload.token);
+      navigate('/profile');
+    } else {
+
+      console.error('Registration failed or token not found:', reguser);
+      setError('email', { message: 'Registration failed, please try again.' }); 
+    }
+  };
+
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(prevState => !prevState);
-  };
-
-  const handleRegister = () => {
-    const newErrors = {};
-
-    if (!nickname) newErrors.nickname = 'Please enter a nickname';
-    if (!email) newErrors.email = 'Please enter an email address';
-    if (!password) newErrors.password = 'Please enter a password';
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-    } else {
-      setErrors({});
-      navigate('/mainwhith');
-    }
   };
 
   return (
@@ -42,26 +46,26 @@ function UntitledPage123(props) {
       <div className={styles.flex_col}>
         <h2 className={styles.big_title}>Sign in</h2>
 
-        <div className={styles.flex_col1}>
+        <form className={styles.flex_col1} onSubmit={handleSubmit(onSubmit)}>
           <div className={styles.content_box2}>
             <input 
               className={styles.medium_title1} 
-              placeholder='Nickname' 
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              placeholder='Email' 
+              type='email' 
+              {...register('email', { required: 'Вкажіть електронну пошту' })} 
+             
             />
-            {errors.nickname && <span className={styles.error}>{errors.nickname}</span>}
+            {errors.nickNam && <span className={styles.error}>{errors.nickNam.message}</span>} 
           </div>
 
           <div className={styles.content_box21}>
             <input 
               className={styles.medium_title11} 
-              placeholder='Email address' 
-              type='email' 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder='Nick Name' 
+              {...register('nickNam', { required: 'Вкажіть нікнейм' })} 
+  
             />
-            {errors.email && <span className={styles.error}>{errors.email}</span>}
+            {errors.email && <span className={styles.error}>{errors.email.message}</span>}
           </div>
 
           <div className={styles.content_box4}>
@@ -70,8 +74,7 @@ function UntitledPage123(props) {
                 className={styles.medium_title12} 
                 placeholder='Password' 
                 type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password', { required: 'Вкажіть пароль ' })} 
               />
               <img 
                 className={styles.image} 
@@ -80,13 +83,12 @@ function UntitledPage123(props) {
                 alt="Show Password"
               />
             </div>
-            {errors.password && <span className={styles.error}>{errors.password}</span>}
+            {errors.password && <span className={styles.error}>{errors.password.message}</span>}
           </div>
-        </div>
-
-        <button className={styles.register_button} onClick={handleRegister}>
-          Register
-        </button>
+          <button className={styles.register_button} type='submit' disabled={!isValid}> {}
+            Register
+          </button>
+        </form>
 
         <h3 className={styles.medium_title_box}>
           <span className={styles.medium_title}>
@@ -103,7 +105,7 @@ function UntitledPage123(props) {
           </Link>
 
           <button className={styles.btn} onClick={() => navigate('/registration')}>
-            <img className={styles.btn_icon} src={require('../icons/profile.png')} />
+            <img className={styles.btn_icon} src={require('../icons/profile.png')} alt="Profile" />
             <h3 className={styles.btn_text}>Registration</h3>
           </button>
         </div>
@@ -113,7 +115,7 @@ function UntitledPage123(props) {
 }
 
 UntitledPage123.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default UntitledPage123;

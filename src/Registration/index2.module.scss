@@ -1,4 +1,3 @@
-@use "../unit" as *;
 
 .root {
   position: relative;
@@ -233,7 +232,7 @@
   .register_button {
     display: block;
     width: 100%;
-    margin-top: 12px;
+    margin-top: -30px;
     padding: 12px;
     background-color: #555555;
     color: white;

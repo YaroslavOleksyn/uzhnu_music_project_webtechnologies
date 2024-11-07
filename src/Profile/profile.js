@@ -1,113 +1,202 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import styles from './profile.module.scss';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAuth, fetchAuthMe, selectIsAuth } from '../redux/auth';
+import axios from '../axios';
 
-function UntitledPage123432(props) {
-  const navigate = useNavigate(); 
+export function Profile() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [isNicknameEditable, setIsNicknameEditable] = useState(false);
-  const [isEmailEditable, setIsEmailEditable] = useState(false);
-  const [isPasswordEditable, setIsPasswordEditable] = useState(false);
+  useEffect(() => {
+    dispatch(fetchAuthMe());
+  }, [dispatch]);
 
+  const isAuth = useSelector(selectIsAuth);
+  const { data } = useSelector((state) => state.auth);
+
+  const originalDataRef = useRef(data || {});
+
+  const [user, setUser] = useState({
+    imageUrl: data?.imageUrl || '',
+    nickNam: data?.nickNam || '',
+    email: data?.email || '',
+  });
+  
   const [isPopupVisible, setPopupVisible] = useState(false);
+  const [isEditing, setEditing] = useState(false);
   const popupRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [changePhoto, setChangePhoto] = useState(true);
+  const [save, setSave] = useState(true);
 
-  const toggleNicknameEdit = () => setIsNicknameEditable((prev) => !prev);
-  const toggleEmailEdit = () => setIsEmailEditable((prev) => !prev);
-  const togglePasswordEdit = () => setIsPasswordEditable((prev) => !prev);
+  const onSubmit = async () => {
+    if (JSON.stringify(user) === JSON.stringify(originalDataRef.current)) {
+      setEditing(false); 
+      return;
+    }
+    try {
+      await axios.patch('/profile', user);
+      window.location.reload();
+    } catch (err) {
+      console.warn(err);
+    }
+  };
 
-  const togglePopup = () => {
-    setPopupVisible((prev) => !prev);
+  const handleChange = async (e) => {
+    const { type, name, value, files } = e.target;
+    
+    if (type === 'file' && files.length > 0) {   
+      const file = files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+  
+      try {
+        const { data } = await axios.post('/uploads', formData);
+        
+        setUser((prevUser) => ({
+          ...prevUser,
+          imageUrl: data.url,
+        }));
+        setChangePhoto(false);
+        setSave(false);
+      } catch (err) {
+        console.error('Error uploading photo:', err);
+        alert('Помилка завантаження фотографії');
+      }
+    } else {
+      setUser((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleContentBoxClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleClickOutsidePopup = (event) => {
+    if (popupRef.current && !popupRef.current.contains(event.target)) {
+      setPopupVisible(false);
+    }
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        setPopupVisible(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutsidePopup);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutsidePopup);
     };
   }, []);
 
+  if (!localStorage.getItem('token') && !isAuth) {
+    return <Navigate to='/' />;
+  }
   return (
-    <div className={cn(styles.root, props.className, 'untitled-page123432')}>
+    <div className={cn(styles.root)}>
       <div className={styles.flex_col}>
         <h2 className={styles.hero_title13}>My Profile</h2>
 
-        <div className={styles.content_box2}>
-          <h2 className={styles.hero_title}></h2>
+        <div
+          className={styles.content_box2}
+          onClick={handleContentBoxClick}
+        >
+          {data ? (
+            <img src={changePhoto ? `http://localhost:5555${data.imageUrl}` : `http://localhost:5555${user.imageUrl}`} alt="Avatar" className={styles.avatar} />
+          ) : (
+            <h2 className={styles.hero_title}>Avatar</h2>
+          )}
         </div>
 
-        <h2 className={styles.hero_title3}>YaroslavOleksyn</h2>
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleChange}
+        />
       </div>
+
       <div className={styles.content_box6}>
-        <div className={styles.content_box3}>
+      <div className={styles.content_box3}>
           <div className={styles.color1} />
-          <input 
-            className={styles.medium_title} 
-            placeholder='YaroslavOleksyn' 
-            disabled={!isNicknameEditable}
+          <input
+            className={styles.medium_title}
+            onChange={handleChange}
+            name='nickNam'
+            value={user.nickNam}
+            placeholder="Nickname"
+            disabled={!isEditing}
           />
-          <h3 className={styles.medium_title1} onClick={toggleNicknameEdit}>Change</h3>
+          <h3 className={styles.medium_title1}>Nickname</h3>
         </div>
         <div className={styles.content_box4}>
           <div className={styles.color1} />
           <h3 className={styles.medium_title11}>Email</h3>
-          <input 
-            className={styles.medium_title2} 
-            placeholder='oleksyn.yaroslav@gmail.com' 
-            disabled={!isEmailEditable} 
+          <input
+            onChange={handleChange}
+            name='email'
+            value={user.email}
+            className={styles.medium_title2}
+            placeholder="Email"
+            disabled={!isEditing}
           />
-          <h3 className={styles.subtitle2} onClick={toggleEmailEdit}>Change</h3>
         </div>
+        <button
+          className={styles.changeButton}
+          onClick={() => setEditing(true)}
+          style={{ display: isEditing ? 'none' : 'block' }}
+        >
+          Change
+        </button>
 
-        <div className={styles.content_box41}>
-          <div className={styles.color11} />
-          <h3 className={styles.medium_title12}>Password</h3>
-          <input 
-            className={styles.medium_title3} 
-            placeholder='*********' 
-            disabled={!isPasswordEditable} 
-          />
-          <h3 className={styles.subtitle3} onClick={togglePasswordEdit}>Change</h3>
-        </div>
+        <button
+          className={styles.saveButton}
+          onClick={() => {
+            setEditing(false);
+            onSubmit();
+          }}
+          style={{ display: isEditing ? 'block' : 'none' }}
+        >
+          Save
+        </button>
       </div>
 
       <div className={styles.content_box}>
         <div className={styles.flex_row4}>
-          <h2 className={styles.hero_title1}>UzhnuMusic</h2>
-          <Link to="/mainwhith" className={styles.hero_title6}>
+          <Link to="/" className={styles.hero_title1}>
+            <h2 className={styles.hero_title1}>UzhnuMusic</h2>
+          </Link>
+          <Link to="/" className={styles.hero_title6}>
             <h2 className={styles.title2}>Music</h2>
           </Link>
-          <Link to="/genrewhith" className={styles.hero_title9}>
+          <Link to="/genre" className={styles.hero_title9}>
             <h2 className={styles.title21}>Genre</h2>
           </Link>
-          <h2 className={styles.bb3}>Preferences</h2>
-
-          <div className={styles.btn} onClick={togglePopup}>
+          <Link to="/preferences" className={styles.bb3}>
+            <h2 className={styles.bb3}>Preferences</h2>
+          </Link>
+          <div className={styles.btn} onClick={() => setPopupVisible(!isPopupVisible)}>
             <img className={styles.btn_icon} src={require('../icons/profile.png')} alt="Profile" />
             {isPopupVisible && (
               <div className={styles.popup} ref={popupRef}>
-                <h3>YaroslavOleksyn</h3>
-                <p>oleksyn.yaroslav@gmail.com</p>
+                <h3>{data && data.nickNam ? data.nickNam : ''}</h3>
+                <p>{data && data.email ? data.email : ''}</p>
                 <hr />
-                <button 
-                  onClick={() => navigate('/profile')} 
+                <button
+                  onClick={() => navigate('/profile')}
                   style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   <p>My account</p>
                 </button>
-                <button 
-                  onClick={() => navigate('/')} 
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    dispatch(fetchAuth(null));
+                    navigate('/');
+                  }}
                   style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  <p>Sign out</p>
+                  <p>Log out</p>
                 </button>
               </div>
             )}
@@ -117,9 +206,3 @@ function UntitledPage123432(props) {
     </div>
   );
 }
-
-UntitledPage123432.propTypes = {
-  className: PropTypes.string
-};
-
-export default UntitledPage123432;

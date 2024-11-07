@@ -1,12 +1,10 @@
-@use "../unit" as *;
 
 .root {
   position: relative;
-  width: 1920px;
-  height: 1090px;
   min-height: 1090px;
   background-color: rgb(231 231 231);
   overflow: hidden;
+  padding: -50px;
 }
 
 .flex_col {
@@ -36,14 +34,15 @@
   background-color: rgb(255 255 255 / 40.3%);
   border-radius: 100px;
   outline: 5px solid rgb(0 0 0 / 40.3%);
+  cursor: pointer;
 }
 
 .hero_title {
   display: flex;
   justify-content: center;
   margin: 48px 32px 48px 30px;
-  font: 700 96px/1.14 "Times New Roman", Helvetica, Arial, serif;
-  color: rgb(0 0 0);
+  font: 200 38px/1.14 "Times New Roman", Helvetica, Arial, serif;
+  color: rgba(0, 0, 0, 0.3);
   text-align: center;
 }
 
@@ -104,6 +103,7 @@
   margin-top: 0px;
   outline: none;
   border: none;
+  background-color: white;
 }
 
 .medium_title1 {
@@ -185,6 +185,7 @@
   margin-top: 0px;
   border: none;
   outline: none;
+  background-color: white;
 }
 
 .content_box41 {
@@ -223,10 +224,10 @@
   width: 700px;
   height: 29px;
   font: 400 24px/1.2 "Inria Serif", Helvetica, Arial, serif;
-  color: rgb(0 0 0);
   margin-top: 5px;
   outline: none;
   border: none;
+  background-color: white;
 }
 
 
@@ -258,7 +259,7 @@
   color: rgb(255, 255, 255);
   cursor: pointer;
   text-decoration: none;
-  margin-left: -50px;
+  margin-left: -25px;
 }
 
 .title2 {
@@ -447,3 +448,89 @@
     cursor: pointer;
   }
   
+  .content_box2 {
+    position: relative;
+    width: 60%;
+    height: 200px; 
+    border-radius: 100px;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+  }
+  
+  .avatarPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #cccccc;
+    color: #888888;
+    text-align: center;
+  }
+  
+  .avatarInput {
+    display: none;
+  }
+  
+  .changeAvatarLabel {
+    position: absolute;
+    bottom: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .changeButton {
+    background-color: #ccc;         
+    color: #333;                 
+    border: none;
+    border-radius: 25px;             
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 26px;
+    transition: background-color 0.3s ease;
+    margin-top: 250px;
+    margin-left: 285px;
+    height: 60px;
+    width: 250px;
+  
+    &:hover {
+      background-color: #b3b3b3;    
+    }
+
+  }
+  
+  .saveButton {
+    background-color: #666;       
+    color: #fff;                    
+    border: none;
+    border-radius: 25px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 26px;
+    margin-left: 10px;            
+    transition: background-color 0.3s ease;
+    margin-top: 250px;
+    margin-left: 285px;
+    height: 60px;
+    width: 250px;
+  
+    &:hover {
+      background-color: #555;      
+    }
+  }
+
+  input {
+    box-shadow: none; 
+  }

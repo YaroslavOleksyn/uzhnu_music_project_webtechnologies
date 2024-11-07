@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Last.fm API
 const LASTFM_API_URL = 'http://ws.audioscrobbler.com/2.0/';
 const LASTFM_API_KEY = 'c943ddf3a3054d13acedc1d9ccd4a786';
 
@@ -18,7 +17,7 @@ export const fetchLastFmTracks = async (genre) => {
   return response.data.tracks.track.map(track => ({
     title: track.name,
     artist: track.artist.name,
-    image: track.image[2]['#text'], // Отримуємо зображення середнього розміру
+    image: track.image[2]['#text'], 
     genre: genre,
   }));
 };

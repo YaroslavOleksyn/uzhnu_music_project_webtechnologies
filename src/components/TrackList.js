@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { fetchLastFmTracks } from './api/LastFm';
-import { fetchJamendoTrack } from './api/Jamendo';
+import { fetchLastFmTrackById } from './api/LastFm'; 
+import { fetchJamendoTrackById } from './api/Jamendo'; 
 
-const MusicPlayer = ({ genre }) => {
+const MusicPlayer = ({ genre, trackIds }) => { 
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,58 +10,49 @@ const MusicPlayer = ({ genre }) => {
   useEffect(() => {
     const getTracks = async () => {
       setLoading(true);
-      setError(null); // Скидаємо помилку на початку запиту
+      setError(null); 
 
       try {
-        const lastFmTracks = await fetchLastFmTracks(genre);
-
         const combinedTracks = await Promise.all(
-          lastFmTracks.map(async (track) => {
-            const jamendoTrack = await fetchJamendoTrack(track.title, track.artist);
+          trackIds.map(async (trackId) => {
+
+            const jamendoTrack = await fetchJamendoTrackById(trackId);
             
-            // Перевіряємо, чи Jamendo знайшов трек
-            if (jamendoTrack && jamendoTrack.length > 0) {
-              // Спробуємо знайти точний збіг за назвою та виконавцем
-              let matchingTrack = jamendoTrack.find(t => 
-                t.title.toLowerCase() === track.title.toLowerCase() &&
-                t.artist.toLowerCase() === track.artist.toLowerCase()
-              );
-
-              // Якщо точного збігу не знайдено, шукаємо частковий збіг
-              if (!matchingTrack) {
-                matchingTrack = jamendoTrack.find(t => 
-                  t.title.toLowerCase().includes(track.title.toLowerCase())
-                );
-              }
-
-              // Якщо знайдено збіг, повертаємо дані треку
-              if (matchingTrack && matchingTrack.audio) {
-                return {
-                  title: matchingTrack.title,
-                  artist: matchingTrack.artist,
-                  image: matchingTrack.image || track.image || '', // Використовуємо зображення з Jamendo, або, якщо його немає, - з Last.fm
-                  streamUrl: matchingTrack.audio, // Отримуємо URL для стрімінгу
-                };
-              }
+            if (jamendoTrack) {
+              return {
+                title: jamendoTrack.name,
+                artist: jamendoTrack.artist_name,
+                image: jamendoTrack.image,
+                streamUrl: jamendoTrack.audio_url,
+              };
             }
-            
-            return null; // Повертаємо null, якщо Jamendo не знайшов трек
+
+            const lastFmTrack = await fetchLastFmTrackById(trackId);
+            if (lastFmTrack) {
+              return {
+                title: lastFmTrack.name,
+                artist: lastFmTrack.artist.name,
+                image: lastFmTrack.album ? lastFmTrack.album.image[2]['#text'] : '',
+                streamUrl: lastFmTrack.url,
+              };
+            }
+
+            return null; 
           })
         );
 
         const filteredTracks = combinedTracks.filter(track => track !== null);
-
         setTracks(filteredTracks);
       } catch (error) {
         console.error("Error fetching tracks:", error);
         setError("There was an error fetching the tracks.");
       } finally {
-        setLoading(false); // Завантаження закінчено
+        setLoading(false);
       }
     };
 
     getTracks();
-  }, [genre]);
+  }, [trackIds]);
 
   if (loading) {
     return <p>Loading tracks...</p>;
