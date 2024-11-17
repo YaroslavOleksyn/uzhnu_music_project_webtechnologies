@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchLastFmTrackById } from './api/LastFm'; 
-import { fetchJamendoTrackById } from './api/Jamendo'; 
+import { fetchLastFmTrackById } from '../api/LastFm'; 
+import { fetchJamendoTrackById } from '../api/Jemendo'; 
 
 const MusicPlayer = ({ genre, trackIds }) => { 
   const [tracks, setTracks] = useState([]);
