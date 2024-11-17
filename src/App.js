@@ -16,7 +16,7 @@ function App() {
   },[]);
  
   return (
-     <div className="App">
+     <div className="App" data-cy-root>
        <Routes>
        <Route path="/" element={<Slavik/>}/>
        <Route path="/registration" element={<Registration />} />
